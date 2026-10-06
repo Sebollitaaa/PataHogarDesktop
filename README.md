@@ -5,8 +5,11 @@ adopción de mascotas. Desde acá se revisan las **solicitudes de verificación*
 refugios, veterinarias y asociaciones protectoras desde la web, y se decide si se les otorga la
 cuenta verificada (aprobar) o no (rechazar, con un motivo).
 
-Está desarrollada en **C# con Windows Forms**, usa el patrón **MVC** y trabaja sobre la misma
-base de datos **MySQL** que el sitio web.
+Está desarrollada en **C# con Windows Forms**, usa el patrón **MVC** y trabaja con dos bases de datos:
+
+- **MySQL**, la misma base que usa el sitio web: de ahí se leen y actualizan las solicitudes de verificación.
+- **MongoDB Atlas**, una base aparte que se usa **solamente para el inicio de sesión**: guarda los usuarios
+  que pueden ingresar a la aplicación, con sus contraseñas protegidas (hash).
 
 > Proyecto académico. La web y la app móvil de Pata Hogar son proyectos aparte; este
 > repositorio contiene solamente la aplicación de escritorio.
@@ -21,7 +24,8 @@ base de datos **MySQL** que el sitio web.
 4. [Requisitos previos](#requisitos-previos)
 5. [Instalación](#instalación)
    - [Parte A: sistema web y base de datos](#parte-a-sistema-web-y-base-de-datos)
-   - [Parte B: aplicación de escritorio](#parte-b-aplicación-de-escritorio)
+   - [Parte B: base de usuarios en MongoDB Atlas](#parte-b-base-de-usuarios-en-mongodb-atlas)
+   - [Parte C: aplicación de escritorio](#parte-c-aplicación-de-escritorio)
 6. [Configuración](#configuración)
 7. [Base de datos](#base-de-datos)
 8. [Ejecución](#ejecución)
@@ -38,7 +42,8 @@ base de datos **MySQL** que el sitio web.
 
 ## Funcionalidades
 
-- **Inicio de sesión** de administrador.
+- **Inicio de sesión** validado contra una base **MongoDB Atlas**: solo ingresan los usuarios registrados y
+  activos, y las contraseñas se guardan como hash (nunca en texto plano).
 - **Menú lateral** con indicador del estado de la conexión a la base de datos.
 - **Solicitudes de verificación**:
   - Listado de solicitudes leídas de la base de datos real.
@@ -62,6 +67,9 @@ base de datos **MySQL** que el sitio web.
 | Windows Forms | Interfaz gráfica |
 | MySQL 8.4 | Base de datos (compartida con el sitio web) |
 | MySqlConnector 2.6.2 | Conexión de C# con MySQL (paquete NuGet) |
+| MongoDB Atlas | Base de datos en la nube, usada solo para los usuarios del inicio de sesión |
+| MongoDB.Driver 3.12.0 | Conexión de C# con MongoDB (paquete NuGet) |
+| BCrypt.Net-Next 4.2.0 | Verificación de las contraseñas contra su hash bcrypt (paquete NuGet) |
 | GDI+ (`System.Drawing`) | Dibujo de los botones y paneles con esquinas redondeadas |
 
 ## Arquitectura del proyecto
@@ -80,7 +88,8 @@ SistemaAdministracionPataHogar/
     |-- configuracion.ejemplo.json             plantilla de configuración (sin datos reales)
     |-- Programa.cs                            punto de entrada
     |-- Modelos/          entidades y reglas (SolicitudVerificacion, ServicioAutenticacion...)
-    |-- Datos/            acceso a la base (ConexionBaseDatos, RepositorioSolicitudes)
+    |-- Datos/            acceso a las bases (MySQL: ConexionBaseDatos, RepositorioSolicitudes;
+    |                     MongoDB: ConexionMongo, RepositorioUsuarios)
     |-- Vistas/           pantallas e interfaces (VistaInicioSesion, VistaPrincipal...)
     |-- Controladores/    lógica de cada pantalla
     `-- Estilos/          colores y controles visuales reutilizables
@@ -105,15 +114,19 @@ controladores no usan nada de Windows Forms (solo conocen las interfaces de las 
 - **MySQL 8.x** (servidor), con permiso para crear bases de datos y usuarios.
 - **Node.js (versión LTS)**, necesario para instalar y ejecutar el **sistema web de Pata Hogar**,
   que es quien genera la estructura de la base de datos y guarda los archivos adjuntos.
-- **El sistema web de Pata Hogar** (repositorio aparte), instalado en la misma computadora.
+- **El sistema web de Pata Hogar** (repositorio aparte:
+  <https://github.com/Sebollitaaa/PataHogarWeb>), instalado en la misma computadora.
   Esta aplicación de escritorio **no funciona de forma independiente**: depende de la base de
   datos y de los archivos del sistema web.
+- Una cuenta gratuita en **MongoDB Atlas** y **conexión a internet**, necesarias para el inicio de sesión
+  (ver [Parte B](#parte-b-base-de-usuarios-en-mongodb-atlas)).
 - **Git**, para clonar los repositorios.
 
 ## Instalación
 
-El sistema completo tiene dos partes que se instalan **en este orden**: primero el sistema web
-con su base de datos (Parte A) y después esta aplicación de escritorio (Parte B).
+El sistema completo tiene tres partes que se instalan **en este orden**: primero el sistema web
+con su base de datos (Parte A), después la base de usuarios en MongoDB Atlas (Parte B) y por último
+esta aplicación de escritorio (Parte C).
 
 ### Parte A: sistema web y base de datos
 
@@ -133,8 +146,8 @@ con su base de datos (Parte A) y después esta aplicación de escritorio (Parte 
 3. **Clonar e instalar el sistema web** (repositorio aparte):
 
    ```bash
-   git clone <URL-DEL-REPOSITORIO-DEL-SISTEMA-WEB>
-   cd <carpeta-del-sistema-web>/backend
+   git clone https://github.com/Sebollitaaa/PataHogarWeb.git
+   cd PataHogarWeb/backend
    npm install
    cd ../frontend
    npm install
@@ -168,7 +181,55 @@ con su base de datos (Parte A) y después esta aplicación de escritorio (Parte 
    `/solicitar-verificacion` del sitio web. Esa solicitud aparecerá en la aplicación de
    escritorio.
 
-### Parte B: aplicación de escritorio
+### Parte B: base de usuarios en MongoDB Atlas
+
+La aplicación valida el inicio de sesión contra una base **MongoDB** en la nube (MongoDB Atlas). Es una
+base **aparte** de MySQL y se usa **solamente** para las credenciales de las personas que pueden ingresar
+a la aplicación.
+
+1. **Crear una cuenta y un cluster gratuito** en [MongoDB Atlas](https://www.mongodb.com/atlas) (plan
+   *Free*, M0). Si ya existe un cluster, se puede reutilizar.
+
+2. **Permitir la IP de la computadora**: en *Network Access* → *Add IP Address*, agregar la dirección IP
+   actual (*Add Current IP Address*). Si se cambia de red, hay que agregar la IP nueva.
+
+3. **Crear un usuario de base de datos de solo lectura**: en *Database Access* → *Add New Database User*,
+   método *Password*. En *Database User Privileges* → *Specific Privileges* agregar el rol `read` sobre la
+   base `PataHogar` (como alternativa más simple, sirve el rol integrado *Only read any database*).
+   Anotar el usuario y la contraseña: se usan en el paso 6. La aplicación solo **lee** esta base, por eso
+   alcanza con permiso de lectura.
+
+4. **Crear la base y la colección**: en *Browse Collections* → *Add My Own Data* (o desde MongoDB
+   Compass), con base de datos `PataHogar` y colección `usuarios`.
+
+5. **Cargar al menos un usuario** en la colección `usuarios` (en Compass: *Add Data* → *Insert Document*)
+   con esta estructura:
+
+   ```json
+   {
+     "nombreUsuario": "tu_usuario",
+     "contrasenaHash": "<hash bcrypt de la contraseña>",
+     "activo": true
+   }
+   ```
+
+   La contraseña **nunca se guarda en texto plano**: se guarda su hash bcrypt. Para generarlo, ejecutar
+   esto desde la carpeta `backend` del sistema web (usa su librería `bcrypt`; pide la contraseña y
+   muestra el hash):
+
+   ```bash
+   node -e "const rl=require('readline').createInterface({input:process.stdin,output:process.stdout});rl.question('Contraseña: ',p=>{console.log(require('bcrypt').hashSync(p,10));rl.close()})"
+   ```
+
+   El resultado empieza con `$2b$10$`. Se copia completo en el campo `contrasenaHash`. El valor
+   de `nombreUsuario` distingue mayúsculas y minúsculas.
+
+6. **Obtener la cadena de conexión**: en *Database* → *Connect* → *Drivers* (C# / .NET), copiar la cadena
+   `mongodb+srv://...` y reemplazar el marcador de contraseña por la contraseña del usuario del paso 3
+   (si tiene caracteres especiales, deben escribirse codificados en formato URL). Esa cadena se pega en
+   `configuracion.local.json` (Parte C).
+
+### Parte C: aplicación de escritorio
 
 1. **Clonar este repositorio**
 
@@ -184,8 +245,8 @@ con su base de datos (Parte A) y después esta aplicación de escritorio (Parte 
    copy SistemaAdministracionPataHogar\configuracion.ejemplo.json SistemaAdministracionPataHogar\configuracion.local.json
    ```
 
-   Después abrir `configuracion.local.json` y completar los datos reales (los mismos de la base
-   creada en la Parte A).
+   Después abrir `configuracion.local.json` y completar los datos reales: los de la base MySQL creada en
+   la Parte A y la cadena de conexión de MongoDB obtenida en la Parte B.
 
 3. **Restaurar paquetes y compilar**
 
@@ -211,9 +272,9 @@ ejemplo.
     "usuario": "usuario_de_la_base",
     "contrasena": "contrasena_de_la_base"
   },
-  "administrador": {
-    "usuario": "usuario_administrador",
-    "contrasena": "contrasena_administrador"
+  "mongoDb": {
+    "cadenaConexion": "mongodb+srv://usuario:contrasena@tu-cluster.mongodb.net/?appName=PataHogarEscritorio",
+    "nombreBaseDeDatos": "PataHogar"
   }
 }
 ```
@@ -223,7 +284,8 @@ ejemplo.
 | `baseDeDatos.servidor` / `puerto` | Dónde escucha el servidor MySQL |
 | `baseDeDatos.nombre` | Nombre de la base de datos del sitio web |
 | `baseDeDatos.usuario` / `contrasena` | Credenciales de MySQL con permiso de lectura y escritura sobre las tablas de verificación |
-| `administrador.usuario` / `contrasena` | Credenciales para ingresar a esta aplicación |
+| `mongoDb.cadenaConexion` | Cadena de conexión de MongoDB Atlas, con el usuario y la contraseña de solo lectura (Parte B, paso 6) |
+| `mongoDb.nombreBaseDeDatos` | Nombre de la base de MongoDB que contiene la colección `usuarios` (`PataHogar`) |
 
 > Si el archivo falta, no tiene formato JSON válido o le falta algún dato, la aplicación muestra un
 > mensaje que indica qué hay que corregir y no inicia. Conviene elegir contraseñas propias y no
@@ -260,6 +322,21 @@ migraciones, ver la [Parte A](#parte-a-sistema-web-y-base-de-datos) de la instal
 Los archivos adjuntos (fotos, PDF) **no están en la base**: la base guarda solo la ruta. Por
 eso la aplicación debe correr en la misma computadora donde el sitio web guarda los archivos.
 
+### Base de usuarios (MongoDB)
+
+Además de MySQL, la aplicación usa una base **MongoDB** que contiene **únicamente** los usuarios que
+pueden iniciar sesión. Estructura de la colección `usuarios` (base `PataHogar`):
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `nombreUsuario` | texto | Nombre con el que la persona inicia sesión (distingue mayúsculas y minúsculas) |
+| `contrasenaHash` | texto | Hash **bcrypt** de la contraseña (empieza con `$2b$`). Nunca la contraseña real |
+| `activo` | `true` / `false` | Si es `false`, o si el campo falta, el usuario **no** puede ingresar |
+
+Para dar de baja a una persona alcanza con poner `activo` en `false`. Al iniciar sesión, la aplicación
+busca el usuario por `nombreUsuario` y verifica la contraseña escrita contra su hash. Si el usuario no
+existe, está inactivo o la contraseña no coincide, se muestra el mismo mensaje de error.
+
 ## Ejecución
 
 Con Visual Studio: abrir `SistemaAdministracionPataHogar.slnx` y presionar **F5**.
@@ -272,6 +349,9 @@ dotnet run --project SistemaAdministracionPataHogar
 
 Antes de abrir la aplicación hay que tener **el servidor MySQL encendido**. Si no lo está, la
 aplicación igual abre, pero muestra el indicador rojo y datos de ejemplo.
+
+Para **iniciar sesión** hace falta además **conexión a internet** y que la IP de la computadora esté
+permitida en MongoDB Atlas (Parte B, paso 2).
 
 ## Cómo funciona (flujo de uso)
 
@@ -291,7 +371,8 @@ Inicio de sesión  ->  Ventana principal  ->  Solicitudes de verificación
                               Se guarda en la base y se recarga la lista
 ```
 
-1. **Iniciar sesión** con las credenciales de administrador definidas en la configuración.
+1. **Iniciar sesión** con un usuario registrado en la colección `usuarios` de MongoDB. La aplicación busca
+   el usuario, comprueba que esté activo y verifica la contraseña contra su hash.
 2. En el menú lateral, abrir **Solicitudes de verificación**. Se cargan las solicitudes desde la
    base de datos.
 3. **Filtrar** con los botones Todas / Pendientes / Aprobadas / Rechazadas.
@@ -345,7 +426,8 @@ El detalle paso a paso está en la sección 11 de la documentación técnica.
 
 **Nunca se deben subir al repositorio:**
 
-- `configuracion.local.json` (contraseñas de la base y del administrador).
+- `configuracion.local.json` (contraseña de MySQL y cadena de conexión de MongoDB Atlas, que incluye
+  usuario y contraseña).
 - Archivos de documentos de usuarios (DNI, fotos, PDF), ni capturas que muestren datos
   personales reales.
 - Las carpetas generadas `bin/`, `obj/` y `.vs/`.
@@ -353,8 +435,19 @@ El detalle paso a paso está en la sección 11 de la documentación técnica.
 El archivo `.gitignore` del proyecto ya excluye estos elementos. Antes de cada `git push`,
 conviene revisar con `git status` qué archivos se van a subir.
 
+Medidas aplicadas en el inicio de sesión:
+
+- Las contraseñas de los usuarios se guardan **solo como hash bcrypt** en MongoDB; no existen en el código ni
+  en el repositorio.
+- El usuario de Atlas que usa la aplicación es de **solo lectura** sobre la base `PataHogar`.
+- Conviene **no** habilitar `0.0.0.0/0` en *Network Access* de Atlas (permite el acceso desde cualquier
+  lugar); es preferible agregar únicamente las IP necesarias.
+- Ante un usuario inexistente, inactivo o con contraseña incorrecta se muestra el mismo mensaje, para no
+  revelar qué usuarios existen.
+
 Si alguna contraseña se subiera por error, **no alcanza con borrar el archivo**: hay que
-cambiar esa contraseña en MySQL, porque el historial de Git conserva la versión anterior.
+cambiar esa contraseña (en MySQL o, para la de MongoDB, en *Database Access* de Atlas), porque el historial
+de Git conserva la versión anterior.
 
 ## Solución de problemas
 
@@ -367,6 +460,8 @@ cambiar esa contraseña en MySQL, porque el historial de Git conserva la versió
 | `dotnet build` falla por la versión del SDK | No está instalado .NET 10 | Instalar el SDK de .NET 10 |
 | Faltan tablas (por ejemplo `verification_requests`) | No se ejecutaron las migraciones del sistema web | En `backend` del sistema web, ejecutar `npm run migrate` |
 | Se aprobó una solicitud pero el usuario no recibe la insignia | El backend del sistema web está apagado | Iniciar el backend; procesa las solicitudes pendientes al arrancar |
+| Al iniciar sesión aparece "No se pudo conectar con la base de usuarios" | Sin internet, la IP no está permitida en Atlas o la cadena de conexión está incompleta (por ejemplo, sin reemplazar la contraseña) | Revisar internet, *Network Access* en Atlas y `mongoDb.cadenaConexion` en `configuracion.local.json` |
+| "Usuario o contraseña incorrectos" aunque los datos parezcan correctos | El usuario no existe en `usuarios`, el campo `activo` es `false` o no está, el hash se copió incompleto, o el nombre difiere en mayúsculas | Revisar el documento del usuario en Compass (o en *Browse Collections*) |
 | La aplicación avisa que falta la configuración | No existe `configuracion.local.json` o le falta un dato | Copiar `configuracion.ejemplo.json` y completarlo |
 
 ## Limitaciones conocidas y próximos pasos
@@ -377,6 +472,11 @@ cambiar esa contraseña en MySQL, porque el historial de Git conserva la versió
   queda vacía) ni se controla que la solicitud siga pendiente.
 - La insignia y la notificación al usuario las aplica el **backend del sistema web** (revisa la base cada
   15 segundos): si está apagado, se procesan cuando vuelve a encenderse.
+- El inicio de sesión **requiere internet** y que la IP esté permitida en Atlas: sin conexión nadie puede
+  ingresar (no hay inicio de sesión sin conexión).
+- Los usuarios se cargan y se dan de baja **a mano** en MongoDB; la aplicación no tiene una pantalla para
+  administrarlos.
+- La ventana principal muestra el nombre "admin" de forma fija, sin importar con qué usuario se ingresó.
 - Los documentos solo se abren si la aplicación corre en la misma PC que guarda los archivos.
 - No hay pruebas automáticas en el repositorio.
 - Próxima funcionalidad prevista: **moderación de reportes de publicaciones**.
