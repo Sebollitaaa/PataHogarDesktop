@@ -1,0 +1,87 @@
+# =============================================================================
+# .gitignore - Pata Hogar Desktop
+# Lo que figura aca NO se sube al repositorio.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1) SECRETOS Y CREDENCIALES  (lo mas importante: nunca deben subirse)
+# -----------------------------------------------------------------------------
+# Configuracion local con contraseñas (la plantilla configuracion.ejemplo.json SI se sube)
+configuracion.local.json
+*.local.json
+
+# Variables de entorno y archivos de claves
+.env
+.env.*
+!.env.example
+*.pfx
+*.pem
+*.key
+*.snk
+secrets.json
+
+# -----------------------------------------------------------------------------
+# 2) DATOS PERSONALES Y COPIAS DE LA BASE DE DATOS
+# -----------------------------------------------------------------------------
+# Copias de seguridad / volcados de la base (pueden contener datos reales de usuarios)
+*_backup.sql
+*.bak
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+
+# Archivos adjuntos de usuarios (DNI, fotos, PDF) y capturas con datos reales
+uploads/
+capturas_privadas/
+
+# -----------------------------------------------------------------------------
+# 3) DOCUMENTOS PERSONALES (no forman parte del repositorio)
+# -----------------------------------------------------------------------------
+CONTEXTO_PROYECTO.md
+DOCUMENTACION_PARA_ALUMNO.md
+DOCUMENTACION_PARA_ALUMNO.pdf
+
+# -----------------------------------------------------------------------------
+# 4) ARCHIVOS GENERADOS AL COMPILAR
+# -----------------------------------------------------------------------------
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+publish/
+*.dll
+*.exe
+*.pdb
+*.cache
+TestResults/
+
+# -----------------------------------------------------------------------------
+# 5) VISUAL STUDIO / EDITORES  (configuracion propia de cada computadora)
+# -----------------------------------------------------------------------------
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+*.vsidx
+*.swp
+
+# -----------------------------------------------------------------------------
+# 6) HERRAMIENTAS DE ASISTENCIA (configuracion local)
+# -----------------------------------------------------------------------------
+.claude/
+
+# -----------------------------------------------------------------------------
+# 7) SISTEMA OPERATIVO Y TEMPORALES
+# -----------------------------------------------------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*.log
+*.tmp
+*.temp

@@ -1,0 +1,13 @@
+{
+  "baseDeDatos": {
+    "servidor": "127.0.0.1",
+    "puerto": "3306",
+    "nombre": "nombre_de_la_base",
+    "usuario": "usuario_de_la_base",
+    "contrasena": "contrasena_de_la_base"
+  },
+  "administrador": {
+    "usuario": "usuario_administrador",
+    "contrasena": "contrasena_administrador"
+  }
+}
