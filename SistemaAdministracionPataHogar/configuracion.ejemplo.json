@@ -6,8 +6,8 @@
     "usuario": "usuario_de_la_base",
     "contrasena": "contrasena_de_la_base"
   },
-  "administrador": {
-    "usuario": "usuario_administrador",
-    "contrasena": "contrasena_administrador"
+  "mongoDb": {
+    "cadenaConexion": "mongodb+srv://usuario:contrasena@tu-cluster.mongodb.net/?appName=PataHogarEscritorio",
+    "nombreBaseDeDatos": "PataHogar"
   }
 }

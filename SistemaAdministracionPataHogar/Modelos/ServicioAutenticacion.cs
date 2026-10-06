@@ -1,22 +1,40 @@
 namespace SistemaAdministracionPataHogar.Modelos
 {
-    // REGLA DE NEGOCIO del inicio de sesión: decide si un usuario y una contraseña son
-    // validos. Antes esta regla estaba escrita adentro del formulario de inicio de sesión;
-    // en MVC las reglas viven en el Modelo, no en la Vista.
+    // REGLA DE NEGOCIO del inicio de sesión: decide si una persona puede ingresar.
     //
-    // El usuario y la contraseña validos NO estan escritos en el codigo: se leen del
-    // archivo local "configuracion.local.json" (seccion "administrador") a traves de
-    // ConfiguracionLocal.
+    // Ya no hay usuario ni contraseña escritos en el codigo. Los usuarios estan en la
+    // coleccion "usuarios" de MongoDB Atlas (los busca el controlador con
+    // RepositorioUsuarios) y esta clase solo aplica la regla sobre el usuario encontrado:
+    //   1) el usuario tiene que existir,
+    //   2) tiene que estar activo,
+    //   3) la contraseña escrita tiene que coincidir con el hash (bcrypt) guardado.
     //
-    // El dia de mañana, si se valida contra la tabla "users" de la base de
-    // datos, SOLO hay que cambiar este archivo: ni la vista ni el controlador
-    // se enteran.
+    // La contraseña real nunca se guarda: solo su hash. BCrypt.Verify calcula el hash de lo
+    // que escribio la persona y lo compara con el guardado.
     public static class ServicioAutenticacion
     {
-        public static bool CredencialesValidas(string usuario, string contrasena)
+        // "usuario" es lo que encontro RepositorioUsuarios (null si no existe).
+        public static bool CredencialesValidas(UsuarioAdministrador usuario, string contrasena)
         {
-            return usuario == ConfiguracionLocal.UsuarioAdministrador &&
-                   contrasena == ConfiguracionLocal.ContrasenaAdministrador;
+            if (usuario == null || !usuario.Activo)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(usuario.ContrasenaHash))
+            {
+                return false;
+            }
+
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(contrasena, usuario.ContrasenaHash);
+            }
+            catch (Exception)
+            {
+                // El hash guardado en la base no tiene un formato valido: no se deja ingresar.
+                return false;
+            }
         }
     }
 }

@@ -261,7 +261,7 @@ namespace SistemaAdministracionPataHogar.Vistas
             lblAyuda.Name = "lblAyuda";
             lblAyuda.Size = new Size(320, 32);
             lblAyuda.TabIndex = 8;
-            lblAyuda.Text = "Usuario de administrador precargado para esta versión de prueba.";
+            lblAyuda.Text = "Ingresá con un usuario habilitado del sistema.";
             lblAyuda.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // VistaInicioSesion

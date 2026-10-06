@@ -2,8 +2,8 @@ using System.Text.Json;
 
 namespace SistemaAdministracionPataHogar.Modelos
 {
-    // Lee los datos sensibles (contraseña de la base de datos y credenciales del
-    // administrador) desde un archivo LOCAL llamado "configuracion.local.json".
+    // Lee los datos sensibles (contraseña de la base de datos MySQL y cadena de conexion a
+    // MongoDB Atlas) desde un archivo LOCAL llamado "configuracion.local.json".
     //
     // Ese archivo NO esta en el codigo ni se sube al repositorio (esta en el
     // .gitignore). En el repositorio solo existe la plantilla
@@ -28,8 +28,8 @@ namespace SistemaAdministracionPataHogar.Modelos
         private static string _nombreBaseDeDatos;
         private static string _usuarioBaseDeDatos;
         private static string _contrasenaBaseDeDatos;
-        private static string _usuarioAdministrador;
-        private static string _contrasenaAdministrador;
+        private static string _mongoCadenaDeConexion;
+        private static string _mongoNombreBaseDeDatos;
 
         // ---- Datos de conexion a MySQL ----
         public static string Servidor { get { AsegurarCarga(); return _servidor; } }
@@ -38,9 +38,9 @@ namespace SistemaAdministracionPataHogar.Modelos
         public static string UsuarioBaseDeDatos { get { AsegurarCarga(); return _usuarioBaseDeDatos; } }
         public static string ContrasenaBaseDeDatos { get { AsegurarCarga(); return _contrasenaBaseDeDatos; } }
 
-        // ---- Credenciales para ingresar a esta aplicacion ----
-        public static string UsuarioAdministrador { get { AsegurarCarga(); return _usuarioAdministrador; } }
-        public static string ContrasenaAdministrador { get { AsegurarCarga(); return _contrasenaAdministrador; } }
+        // ---- Datos de conexion a MongoDB Atlas (solo para el inicio de sesion) ----
+        public static string MongoCadenaDeConexion { get { AsegurarCarga(); return _mongoCadenaDeConexion; } }
+        public static string MongoNombreBaseDeDatos { get { AsegurarCarga(); return _mongoNombreBaseDeDatos; } }
 
         // Si todavia no se leyo el archivo, lo lee ahora.
         private static void AsegurarCarga()
@@ -96,8 +96,8 @@ namespace SistemaAdministracionPataHogar.Modelos
                 _nombreBaseDeDatos = LeerTexto(raiz, "baseDeDatos", "nombre");
                 _usuarioBaseDeDatos = LeerTexto(raiz, "baseDeDatos", "usuario");
                 _contrasenaBaseDeDatos = LeerTexto(raiz, "baseDeDatos", "contrasena");
-                _usuarioAdministrador = LeerTexto(raiz, "administrador", "usuario");
-                _contrasenaAdministrador = LeerTexto(raiz, "administrador", "contrasena");
+                _mongoCadenaDeConexion = LeerTexto(raiz, "mongoDb", "cadenaConexion");
+                _mongoNombreBaseDeDatos = LeerTexto(raiz, "mongoDb", "nombreBaseDeDatos");
             }
 
             _cargada = true;
