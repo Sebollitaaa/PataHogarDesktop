@@ -7,6 +7,7 @@ namespace SistemaAdministracionPataHogar.Vistas
         event EventHandler VistaMostrada;             // la ventana termino de aparecer
         event EventHandler AbrirSolicitudesSolicitado; // se hizo clic en "Solicitudes de verificacion"
         event EventHandler CerrarSesionSolicitado;     // se hizo clic en "Cerrar sesion"
+        event EventHandler ManualSolicitado;           // se hizo clic en "Manual de usuario"
 
         // ---- Ordenes del controlador a la vista ----
         void MostrarBienvenida();
@@ -14,6 +15,7 @@ namespace SistemaAdministracionPataHogar.Vistas
         void ResaltarSeccionSolicitudes();
         void MostrarEstadoBaseDeDatos(bool conectado, string mensaje);
         bool ConfirmarCerrarSesion();
+        void MostrarError(string mensaje);
         void CerrarVentana();
     }
 }

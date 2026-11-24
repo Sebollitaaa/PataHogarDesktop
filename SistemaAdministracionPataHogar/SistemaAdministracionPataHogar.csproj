@@ -17,6 +17,14 @@
   <!-- La configuracion local (contraseñas) no esta en el repositorio: cada instalacion crea
        su propio configuracion.local.json a partir de configuracion.ejemplo.json. Si existe,
        se copia junto al ejecutable al compilar. -->
+  <!-- El PDF unico de documentacion (en la raiz del repositorio) incluye el manual de
+       usuario. Se copia junto al ejecutable para poder abrirlo desde el menu del sistema. -->
+  <ItemGroup>
+    <None Include="..\Documentacion Proyecto Final - PataHogar Desktop.pdf" Link="Documentacion Proyecto Final - PataHogar Desktop.pdf" Condition="Exists('..\Documentacion Proyecto Final - PataHogar Desktop.pdf')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <ItemGroup>
     <None Update="configuracion.local.json" Condition="Exists('configuracion.local.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

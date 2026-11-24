@@ -13,6 +13,9 @@ namespace SistemaAdministracionPataHogar.Vistas
         private BotonRedondeado btnFiltroPendientes;
         private BotonRedondeado btnFiltroAprobadas;
         private BotonRedondeado btnFiltroRechazadas;
+        private Panel panelBusqueda;
+        private PanelRedondeado pnlBusqueda;
+        private TextBox txtBusqueda;
         private FlowLayoutPanel flujoLista;
 
         private PanelRedondeado panelDetalle;
@@ -38,6 +41,9 @@ namespace SistemaAdministracionPataHogar.Vistas
             btnFiltroPendientes = new BotonRedondeado();
             btnFiltroAprobadas = new BotonRedondeado();
             btnFiltroRechazadas = new BotonRedondeado();
+            panelBusqueda = new Panel();
+            pnlBusqueda = new PanelRedondeado();
+            txtBusqueda = new TextBox();
             flujoLista = new FlowLayoutPanel();
 
             panelDetalle = new PanelRedondeado();
@@ -79,6 +85,27 @@ namespace SistemaAdministracionPataHogar.Vistas
 
             panelFiltros.Controls.Add(flujoFiltros);
 
+            // Buscador: queda debajo de los filtros. Es un cuadro de texto sin borde
+            // adentro de un panel redondeado (igual que los campos del inicio de sesion).
+            // El relleno derecho de 24 px hace que tenga el mismo ancho que las tarjetas.
+            panelBusqueda.Dock = DockStyle.Top;
+            panelBusqueda.Height = 50;
+            panelBusqueda.BackColor = TemaApp.Fondo;
+            panelBusqueda.Padding = new Padding(0, 8, 24, 4);
+
+            pnlBusqueda.Dock = DockStyle.Fill;
+            pnlBusqueda.RadioEsquinas = 8;
+            pnlBusqueda.Padding = new Padding(12, 10, 12, 0); // el 10 de arriba centra el texto en la caja
+
+            txtBusqueda.Dock = DockStyle.Fill;
+            txtBusqueda.BorderStyle = BorderStyle.None;
+            txtBusqueda.Font = TemaApp.FuenteCuerpo;
+            txtBusqueda.ForeColor = TemaApp.TextoPrincipal;
+            txtBusqueda.PlaceholderText = "Buscar por nombre, ciudad o responsable...";
+
+            pnlBusqueda.Controls.Add(txtBusqueda);
+            panelBusqueda.Controls.Add(pnlBusqueda);
+
             flujoLista.Dock = DockStyle.Fill;
             flujoLista.FlowDirection = FlowDirection.TopDown;
             flujoLista.WrapContents = false;
@@ -86,7 +113,9 @@ namespace SistemaAdministracionPataHogar.Vistas
             flujoLista.BackColor = TemaApp.Fondo;
             flujoLista.Padding = new Padding(0, 12, 0, 0);
 
+            // El orden importa: el ultimo que se agrega queda mas arriba.
             panelListado.Controls.Add(flujoLista);
+            panelListado.Controls.Add(panelBusqueda);
             panelListado.Controls.Add(panelFiltros);
 
             // ---- Columna derecha: detalle de la solicitud elegida ----

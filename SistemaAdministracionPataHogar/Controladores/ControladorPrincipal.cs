@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using SistemaAdministracionPataHogar.Datos;
 using SistemaAdministracionPataHogar.Vistas;
 
@@ -10,6 +11,9 @@ namespace SistemaAdministracionPataHogar.Controladores
     public class ControladorPrincipal
     {
         private IVistaPrincipal _vista;
+
+        // Nombre del PDF unico de documentacion (contiene el manual de usuario).
+        private const string ArchivoManual = "Documentacion Proyecto Final - PataHogar Desktop.pdf";
 
         // Guardamos el controlador de la pantalla de solicitudes para que
         // siga "vivo" mientras la pantalla este abierta.
@@ -26,8 +30,34 @@ namespace SistemaAdministracionPataHogar.Controladores
             _vista.VistaMostrada += AlMostrarseVista;
             _vista.AbrirSolicitudesSolicitado += AlSolicitarAbrirSolicitudes;
             _vista.CerrarSesionSolicitado += AlSolicitarCerrarSesion;
+            _vista.ManualSolicitado += AlSolicitarManual;
 
             _vista.MostrarBienvenida();
+        }
+
+        // Abre el PDF de la documentacion (que incluye el manual de usuario) con el
+        // programa que Windows tenga para los PDF. El archivo se copia junto al
+        // ejecutable al compilar (ver el .csproj).
+        private void AlSolicitarManual(object sender, EventArgs e)
+        {
+            string ruta = Path.Combine(AppContext.BaseDirectory, ArchivoManual);
+
+            if (!File.Exists(ruta))
+            {
+                _vista.MostrarError("No se encontró el manual de usuario:\n" + ruta);
+                return;
+            }
+
+            try
+            {
+                ProcessStartInfo informacionDeInicio = new ProcessStartInfo(ruta);
+                informacionDeInicio.UseShellExecute = true;
+                Process.Start(informacionDeInicio);
+            }
+            catch (Exception ex)
+            {
+                _vista.MostrarError("No se pudo abrir el manual de usuario:\n" + ex.Message);
+            }
         }
 
         // Se ejecuta una sola vez, cuando la ventana ya se termino de mostrar.

@@ -24,6 +24,9 @@ namespace SistemaAdministracionPataHogar.Controladores
         // Cual de los 4 filtros esta activo: "Todas", "Pendiente", "Aprobada" o "Rechazada".
         private string _filtroActual = "Todas";
 
+        // Lo que esta escrito en el buscador (vacio = no se busca nada).
+        private string _textoBusqueda = "";
+
         // La solicitud que esta seleccionada (o null si no hay ninguna).
         private SolicitudVerificacion _solicitudSeleccionada = null;
 
@@ -35,6 +38,7 @@ namespace SistemaAdministracionPataHogar.Controladores
             _vista = vista;
 
             _vista.FiltroCambiado += AlCambiarFiltro;
+            _vista.BusquedaCambiada += AlCambiarBusqueda;
             _vista.SolicitudSeleccionada += AlSeleccionarSolicitud;
             _vista.AbrirDocumentoSolicitado += AlSolicitarAbrirDocumento;
             _vista.AprobarSolicitado += AlSolicitarAprobar;
@@ -52,16 +56,22 @@ namespace SistemaAdministracionPataHogar.Controladores
         // Listado y filtros
         // ---------------------------------------------------------------
 
-        // Lee todas las solicitudes del modelo, se queda solo con las que
-        // cumplen el filtro actual y le pide a la vista que las dibuje.
+        // Lee todas las solicitudes del modelo y despues las muestra filtradas.
         private void CargarListado()
         {
             _todasLasSolicitudes = RepositorioSolicitudes.ObtenerTodas();
+            MostrarSolicitudesFiltradas();
+        }
 
+        // Se queda solo con las solicitudes que cumplen el filtro de estado Y la
+        // busqueda, y le pide a la vista que las dibuje. No vuelve a leer la base
+        // de datos: trabaja con la lista que ya se leyo.
+        private void MostrarSolicitudesFiltradas()
+        {
             List<SolicitudVerificacion> filtradas = new List<SolicitudVerificacion>();
             foreach (SolicitudVerificacion solicitud in _todasLasSolicitudes)
             {
-                if (CoincideConFiltro(solicitud))
+                if (CoincideConFiltro(solicitud) && CoincideConBusqueda(solicitud))
                 {
                     filtradas.Add(solicitud);
                 }
@@ -85,10 +95,37 @@ namespace SistemaAdministracionPataHogar.Controladores
             return true;
         }
 
+        // Devuelve true si el texto buscado aparece en el nombre de la
+        // organizacion, en la ciudad o en el nombre del responsable.
+        // No distingue mayusculas de minusculas.
+        private bool CoincideConBusqueda(SolicitudVerificacion solicitud)
+        {
+            string texto = _textoBusqueda.Trim().ToLower();
+
+            if (texto == "") return true;
+
+            if (ContieneTexto(solicitud.NombreOrganizacion, texto)) return true;
+            if (ContieneTexto(solicitud.Ciudad, texto)) return true;
+            if (ContieneTexto(solicitud.NombreResponsable, texto)) return true;
+            return false;
+        }
+
+        private bool ContieneTexto(string campo, string texto)
+        {
+            if (campo == null) return false;
+            return campo.ToLower().Contains(texto);
+        }
+
         private void AlCambiarFiltro(object sender, EventArgs e)
         {
             _filtroActual = _vista.FiltroElegido;
             CargarListado();
+        }
+
+        private void AlCambiarBusqueda(object sender, EventArgs e)
+        {
+            _textoBusqueda = _vista.TextoBusqueda;
+            MostrarSolicitudesFiltradas();
         }
 
         // ---------------------------------------------------------------

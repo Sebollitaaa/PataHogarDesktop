@@ -12,6 +12,7 @@ namespace SistemaAdministracionPataHogar.Vistas
         private Panel panelPieBarraLateral;
         private Label lblUsuarioActivo;
         private Label lblEstadoBaseDeDatos;
+        private LinkLabel lnkManualUsuario;
         private LinkLabel lnkCerrarSesion;
 
         private Panel panelPrincipal;
@@ -39,6 +40,7 @@ namespace SistemaAdministracionPataHogar.Vistas
             panelPieBarraLateral = new Panel();
             lblUsuarioActivo = new Label();
             lblEstadoBaseDeDatos = new Label();
+            lnkManualUsuario = new LinkLabel();
             lnkCerrarSesion = new LinkLabel();
 
             panelPrincipal = new Panel();
@@ -69,7 +71,7 @@ namespace SistemaAdministracionPataHogar.Vistas
             // ---- Pie de la barra lateral: usuario, estado de la base y cerrar sesion ----
 
             panelPieBarraLateral.Dock = DockStyle.Bottom;
-            panelPieBarraLateral.Height = 104;
+            panelPieBarraLateral.Height = 130;
             panelPieBarraLateral.BackColor = TemaApp.BarraLateral;
 
             lblUsuarioActivo.Text = "👤  admin";
@@ -90,6 +92,19 @@ namespace SistemaAdministracionPataHogar.Vistas
             lblEstadoBaseDeDatos.Location = new Point(0, 32);
             lblEstadoBaseDeDatos.Size = new Size(240, 32);
 
+            lnkManualUsuario.Text = "📖  Manual de usuario";
+            lnkManualUsuario.LinkColor = TemaApp.BarraLateralTexto;
+            lnkManualUsuario.ActiveLinkColor = Color.White;
+            lnkManualUsuario.VisitedLinkColor = TemaApp.BarraLateralTexto;
+            lnkManualUsuario.LinkBehavior = LinkBehavior.HoverUnderline;
+            lnkManualUsuario.Font = TemaApp.FuenteEtiqueta;
+            lnkManualUsuario.BackColor = Color.Transparent;
+            lnkManualUsuario.AutoSize = false;
+            lnkManualUsuario.TextAlign = ContentAlignment.MiddleLeft;
+            lnkManualUsuario.Padding = new Padding(24, 0, 0, 0);
+            lnkManualUsuario.Location = new Point(0, 68);
+            lnkManualUsuario.Size = new Size(240, 24);
+
             lnkCerrarSesion.Text = "Cerrar sesión";
             lnkCerrarSesion.LinkColor = TemaApp.BarraLateralTexto;
             lnkCerrarSesion.ActiveLinkColor = Color.White;
@@ -100,11 +115,12 @@ namespace SistemaAdministracionPataHogar.Vistas
             lnkCerrarSesion.AutoSize = false;
             lnkCerrarSesion.TextAlign = ContentAlignment.MiddleLeft;
             lnkCerrarSesion.Padding = new Padding(24, 0, 0, 0);
-            lnkCerrarSesion.Location = new Point(0, 68);
+            lnkCerrarSesion.Location = new Point(0, 96);
             lnkCerrarSesion.Size = new Size(240, 24);
 
             panelPieBarraLateral.Controls.Add(lblUsuarioActivo);
             panelPieBarraLateral.Controls.Add(lblEstadoBaseDeDatos);
+            panelPieBarraLateral.Controls.Add(lnkManualUsuario);
             panelPieBarraLateral.Controls.Add(lnkCerrarSesion);
 
             panelBarraLateral.Controls.Add(lblMarca);

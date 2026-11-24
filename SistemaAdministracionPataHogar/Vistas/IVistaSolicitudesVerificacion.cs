@@ -15,9 +15,11 @@ namespace SistemaAdministracionPataHogar.Vistas
         SolicitudVerificacion SolicitudElegida { get; } // la tarjeta en la que se hizo clic
         string RutaDocumentoElegido { get; }          // el documento cuyo boton "Abrir" se apreto
         string MotivoRechazoEscrito { get; }          // lo que escribio el admin en la caja de motivo
+        string TextoBusqueda { get; }                 // lo que se escribio en el buscador
 
         // ---- Avisos de la vista al controlador ----
         event EventHandler FiltroCambiado;
+        event EventHandler BusquedaCambiada;
         event EventHandler SolicitudSeleccionada;
         event EventHandler AbrirDocumentoSolicitado;
         event EventHandler AprobarSolicitado;

@@ -38,6 +38,7 @@ namespace SistemaAdministracionPataHogar.Vistas
         // ---------------------------------------------------------------
 
         public event EventHandler FiltroCambiado;
+        public event EventHandler BusquedaCambiada;
         public event EventHandler SolicitudSeleccionada;
         public event EventHandler AbrirDocumentoSolicitado;
         public event EventHandler AprobarSolicitado;
@@ -67,6 +68,11 @@ namespace SistemaAdministracionPataHogar.Vistas
             }
         }
 
+        public string TextoBusqueda
+        {
+            get { return txtBusqueda.Text; }
+        }
+
         public VistaSolicitudesVerificacion()
         {
             InitializeComponent();
@@ -75,6 +81,17 @@ namespace SistemaAdministracionPataHogar.Vistas
             btnFiltroPendientes.Click += BotonDeFiltro_Click;
             btnFiltroAprobadas.Click += BotonDeFiltro_Click;
             btnFiltroRechazadas.Click += BotonDeFiltro_Click;
+            txtBusqueda.TextChanged += txtBusqueda_TextChanged;
+        }
+
+        // Cada vez que cambia el texto del buscador, la vista solo avisa.
+        // El que decide que solicitudes se muestran es el controlador.
+        private void txtBusqueda_TextChanged(object sender, EventArgs e)
+        {
+            if (BusquedaCambiada != null)
+            {
+                BusquedaCambiada(this, EventArgs.Empty);
+            }
         }
 
         // ---------------------------------------------------------------

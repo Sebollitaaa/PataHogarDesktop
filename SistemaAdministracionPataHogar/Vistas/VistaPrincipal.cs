@@ -11,6 +11,7 @@ namespace SistemaAdministracionPataHogar.Vistas
         public event EventHandler VistaMostrada;
         public event EventHandler AbrirSolicitudesSolicitado;
         public event EventHandler CerrarSesionSolicitado;
+        public event EventHandler ManualSolicitado;
 
         public VistaPrincipal()
         {
@@ -18,8 +19,17 @@ namespace SistemaAdministracionPataHogar.Vistas
 
             panelEncabezado.Paint += panelEncabezado_Paint;
             btnSolicitudes.Click += btnSolicitudes_Click;
+            lnkManualUsuario.LinkClicked += lnkManualUsuario_LinkClicked;
             lnkCerrarSesion.LinkClicked += lnkCerrarSesion_LinkClicked;
             Shown += VistaPrincipal_Shown;
+        }
+
+        private void lnkManualUsuario_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (ManualSolicitado != null)
+            {
+                ManualSolicitado(this, EventArgs.Empty);
+            }
         }
 
         // ---- Eventos de los controles: solo reenvian el aviso ----
@@ -111,6 +121,11 @@ namespace SistemaAdministracionPataHogar.Vistas
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             return resultado == DialogResult.Yes;
+        }
+
+        public void MostrarError(string mensaje)
+        {
+            MessageBox.Show(this, mensaje, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         public void CerrarVentana()
